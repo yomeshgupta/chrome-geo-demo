@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Geo Demo | Yomesh Gupta</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				transition: all 0.2s linear;
+				font-family: 'Roboto';
+				font-style: normal;
+				margin: 0;
+				padding: 0;
+			}
+			section {
+				width: 100%;
+				height: 100vh;
+				background-color: #2d3436;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			.container {
+				color: #000;
+				display: flex;
+				width: 80%;
+				min-height: 80vh;
+				margin: 0 auto;
+			}
+			.content {
+				width: 50%;
+			}
+			#image-wrapper {
+				background-color: #eb4d4b;
+				background-size: cover;
+				background-position: center center;
+				border-top-left-radius: 5px;
+				border-bottom-left-radius: 5px;
+			}
+			#location {
+				background-color: #fff;
+				border-top-right-radius: 5px;
+				border-bottom-right-radius: 5px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			h1 {
+				font-size: 180%;
+				text-align: center;
+			}
+			h1 span {
+				color: #eb4d4b;
+			}
+		</style>
+	</head>
+	<body>
+		<section>
+			<div class="container">
+				<div class="content" id="image-wrapper"></div>
+				<div class="content" id="location">
+					<h1 class="heading">Loading...</h1>
+				</div>
+			</div>
+		</section>
+		<script type="text/javascript">
+			const CONFIG = {
+				base: 'https://api.opencagedata.com/geocode/v1/json',
+				key: '63642e9ea9c84e1fb180c210a90c9080',
+				imagePath: '/img/'
+			};
+			const BACKGROUNDS = {
+				delhi: 'delhi.jpg',
+				berlin: 'berlin.jpg',
+				london: 'london.jpg',
+				'san fransico': 'san-fransico.jpg',
+				default: 'default.jpg',
+				england: 'london.jpg',
+				california: 'san-fransico.jpg',
+				moscow: 'moscow.jpg'
+			};
+			const heading = document.querySelector('.heading');
+			const imageWrapper = document.getElementById('image-wrapper');
+			let called = 0;
+
+			function processing({ coords: { latitude, longitude } }) {
+				++called;
+
+				if (called % 2 === 1) return;
+
+				heading.innerText = 'Loading...';
+
+				let url = CONFIG.base + '?key=' + CONFIG.key;
+				url += '&q=' + encodeURIComponent(latitude + ',' + longitude);
+				url += '&pretty=1&no_annotations=1';
+
+				return fetch(url)
+					.then(response => response.json())
+					.then(({ status: { code }, results, total_results }) => {
+						if (total_results < 1) {
+							return Promise.reject({
+								code: -1,
+								message: 'Unknown Region'
+							});
+						} else if (code !== 200) {
+							return Promise.reject({
+								code: -2,
+								message: 'Request Failed'
+							});
+						}
+
+						const { state, country } = results[0].components;
+						return updateLocation(state, country);
+					})
+					.catch(function(response) {
+						console.log('Error ', response);
+						return errorHandler();
+					});
+			}
+
+			function updateLocation(state, country) {
+				heading.innerHTML = `Welcome to <span id="place">${state}, ${country}</span>.`;
+				imageWrapper.style.backgroundImage = `url("${CONFIG.imagePath}${BACKGROUNDS[state.toLowerCase()] ||
+					BACKGROUNDS['default']}")`;
+			}
+
+			function errorHandler(err) {
+				console.log('Oops something went wrong! -- ', err);
+				heading.innerHTML = 'Looks like it is broken!';
+				imageWrapper.style.backgroundImage = `url("${CONFIG.imagePath}${BACKGROUNDS['default']}")`;
+			}
+
+			if (navigator && navigator.geolocation) {
+				navigator.geolocation.getCurrentPosition(processing, errorHandler);
+				navigator.geolocation.watchPosition(processing, errorHandler);
+			}
+		</script>
+	</body>
+</html>
