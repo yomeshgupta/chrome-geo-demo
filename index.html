@@ -3,6 +3,7 @@
 	<head>
 		<title>Geo Demo | Yomesh Gupta</title>
 		<link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<style>
 			* {
 				box-sizing: border-box;
@@ -14,6 +15,9 @@
 			}
 			html, body {
 				min-width: 1200px;
+				width: 100%;
+				height: 100%;
+				background-color: #2d3436;
 			}
 			section {
 				width: 100%;
@@ -55,10 +59,27 @@
 			h1 span {
 				color: #eb4d4b;
 			}
+			#mobile-content {
+				display: none;
+				width: 60%;
+				background: #fff;
+				color: #000;
+				padding: 20px;
+				margin-top: 30px;
+			}
+			@media only screen and (max-width: 600px) {
+				#desktop-content {
+					display: none;
+				}
+				#mobile-content {
+					display: block;
+				}
+			  
+			}
 		</style>
 	</head>
 	<body>
-		<section>
+		<section id="desktop-content">
 			<div class="container">
 				<div class="content" id="image-wrapper"></div>
 				<div class="content" id="location">
@@ -66,6 +87,9 @@
 				</div>
 			</div>
 		</section>
+		<div id="mobile-content">
+			<h1>This a desktop only demo. Please open this page via desktop.</h1>
+		<div>
 		<script type="text/javascript">
 			const CONFIG = {
 				base: 'https://api.opencagedata.com/geocode/v1/json',
